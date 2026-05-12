@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gansu Poultry Intelligence System</title>
+    <meta name="description" content="Monitor and manage your poultry farm with real-time production, profit, and analytics.">
+    <meta name="keywords" content="Poultry, Farm Management, Eggs, Broilers, Analytics, Dashboard">
+    <meta name="author" content="GANSU Whesu Michael">
+    
+    <!-- Favicon & Shortcut Icon -->
+    <link rel="icon" href="gansu-logo.png" type="image/png">
+    <link rel="shortcut icon" href="gansu-logo.png" type="image/png">
+    <link rel="stylesheet" type="text/css" media="screen" href="style.css" />
+    
+</head>
+<body>
+
+    
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+        <h2>Gansu System</h2>
+    
+        <button type="button" onclick="showModule('broiler')">Broiler</button>
+        <button type="button" onclick="showModule('layers')">Layers</button>
+        <button type="button" onclick="showModule('feedmill')">Feedmill</button>
+        <button type="button" onclick="showModule('masterDashboard')">Master Dashboard</button>
+      </aside>
+    
+<div class="main">
+    
+        <!-- ================= BROILER MODULE ================= -->
+  <section id="broiler" class="module hidden">
+    
+          <div class="subnav">
+            <button onclick="showSub('broiler', 'dashboard')">Dashboard</button>
+            <button onclick="showSub('broiler', 'production')">Production</button>
+            <button onclick="showSub('broiler', 'sales')">Sales</button>
+            <button onclick="showSub('broiler', 'expenses')">Expenses</button>
+          </div>
+    
+          <div id="broiler-production" class="subpage hidden">
+            <!-- FORM -->
+            <div class="card">
+                <h3>Daily Record</h3>
+                
+                <div class="form-grid">
+                <input type="date" id="date">
+                <input type="number" id="age" placeholder="Age (day)">
+                <input type="number" id="opening" placeholder="Opening">
+                <input type="number" id="feed" placeholder="Feed (kg)">
+                <input type="number" id="water" placeholder="Water (L)">
+                <input type="text" id="medication" placeholder="Medication">
+                <input type="number" id="weight" placeholder="Avg Weight">
+                <input type="number" id="mortality" placeholder="Mortality">
+                <input type="text" id="remarks" placeholder="Remarks">
+                </div>
+                
+                <div class="btn-group">
+                <button onclick="addRecord()">Add</button>
+                <button onclick="resetData()">Reset</button>
+                <button onclick="window.print()">Print</button>
+                </div>
+                
+            </div>
+            
+            <!-- TABLE -->
+            <div class="card">
+                <h3>Records</h3>
+                
+                <div class="table-wrapper">
+                <table id="table">
+                <thead>
+                <tr>
+                <th>Date</th>
+                <th>Age</th>
+                <th>Opening</th>
+                <th>Feed</th>
+                <th>Weight</th>
+                <th>Mortality</th>
+                <th>Closing</th>
+                </tr>
+                </thead>
+                <tbody></tbody>
+                <tfoot>
+                <tr>
+                <th colspan="3">TOTAL</th>
+                <th id="totalFeed"></th>
+                <th></th>
+                <th id="totalMort"></th>
+                <th id="finalStock"></th>
+                </tr>
+                </tfoot>
+                </table>
+                </div>
+                
+            </div>
+            
+            
+            <!-- SUMMARY -->
+            <div class="card summary">
+            <div>Total Feed: <span id="sumFeed"></span></div>
+            <div>FCR: <span id="fcr"></span></div>
+            <div>Total Mortality: <span id="sumMort"></span></div>
+            <div>Break-even: <span id="breakeven"></span></div>
+            </div>
+            
+            <!-- CHART -->
+            <div class="card">
+                <h3>Growth Chart</h3>
+                <canvas id="chart" style="width:100%; height:300px;"></canvas>
+            </div>
+            
+            <!-- AI SUGGESTION -->
+            <div class="card">
+            <h3>AI Suggestions</h3>
+            <p id="ai"></p>
+            </div>
+            
+            </div>
+            
+            <div id="broiler-sales" class="subpage hidden">
+                <div class="card">
+                    <h3>Sales Record</h3>
+                    
+                    <div class="form-grid">
+                    <input type="date" id="s_date">
+                    <select id="s_type">
+                    <option>Cash</option>
+                    <option>Credit</option>
+                    </select>
+                    <input type="text" id="s_desc" placeholder="Description">
+                    <input type="number" id="s_amount" placeholder="Amount">
+                    </div>
+                    
+                    <div class="btn-group">
+                    <button onclick="addSale()">Add Sale</button>
+                    <button onclick="cleanData()">Reset</button>
+                    <button onclick="window.print()">Print</button>
+                    </div>
+                    
+                </div>
+                    
+                    <div class="card table-wrapper">
+                    <table id="salesTable">
+                    <thead>
+                    <tr>
+                    <th>Date</th>
+                    <th>Type</th>
+                    <th>Description</th>
+                    <th>Amount</th>
+                    </tr>
+                    </thead>
+                    <tbody></tbody>
+                    <tfoot>
+                    <tr>
+                    <th colspan="3">TOTAL</th>
+                    <th id="totalSales"></th>
+                    </tr>
+                    </tfoot>
+                    </table>
+                    </div>
+                
+            </div>
+            
+            <div id="broiler-expenses" class="subpage hidden">
+            
+                    <div class="card">
+                    <h3>Expenses Record</h3>
+                    
+                    <div class="form-grid">
+                    <input type="date" id="e_date">
+                    <input type="text" id="e_desc" placeholder="Description">
+                    <select id="e_type">
+                    <option>Feed</option>
+                    <option>Medication</option>
+                    <option>Labor</option>
+                    <option>Transport</option>
+                    <option>Other</option>
+                    </select>
+                    <input type="number" id="e_amount" placeholder="Amount">
+                    </div>
+                    
+                    <div class="btn-group">
+                    <button onclick="addExpense()">Add Expense</button>
+                    <button onclick="clearData()">Reset</button>
+                    <button onclick="window.print()">Print</button>
+                    </div>
+                    
+                </div>
+                    
+                    <div class="card table-wrapper">
+                    <table id="expenseTable">
+                    <thead>
+                    <tr>
+                    <th>Date</th>
+                    <th>Description</th>
+                    <th>Type</th>
+                    <th>Amount</th>
+                    </tr>
+                    </thead>
+                    <tbody></tbody>
+                    <tfoot>
+                    <tr>
+                    <th colspan="3">TOTAL</th>
+                    <th id="totalExpenses"></th>
+                    </tr>
+                    </tfoot>
+                    </table>
+                    </div>
+                    
+            </div>
+            
+            <div id="broiler-dashboard" class="subpage">
+            
+                    <div class="card summary">
+                    <div>Total Sales: <span id="sumSales"></span></div>
+                    <div>Total Expenses: <span id="sumExpenses"></span></div>
+                    <div>Profit/Loss: <span id="profit"></span></div>
+                    <div>Cost per Bird: <span id="costPerBird"></span></div>
+                    </div>
+                    
+                    <div class="card">
+                    <h3>AI Business Insights</h3>
+                    <p id="aiBusiness"></p>
+                    </div>
+                    
+                    <div class="card">
+                        <h3>Financial Overview</h3>
+                        <canvas id="financeChart" style="width:100%; height:300px;"></canvas>
+                    </div>
+            </div>
+  </section>
+    
+        <!-- ================= LAYERS MODULE ================= -->
+  <section id="layers" class="module hidden">
+    
+          <div class="subnav">
+            <button onclick="showSub('layers', 'dashboard')">Dashboard</button>
+            <button onclick="showSub('layers', 'production')">Egg Production</button>
+            <button onclick="showSub('layers', 'analytics')">Analytics</button>
+            <button class="print-btn" onclick="window.print()">Print Report</button>
+          </div>
+    
+          <!-- DASHBOARD -->
+          <div id="layers-dashboard" class="subpage">
+          <h2>Layers Dashboard</h2>
+    
+              
+              <div class="cards">
+              <div class="card">Eggs: <span id="dEggs">0</span></div>
+              <div class="card">Revenue: <span id="dRevenue">0</span></div>
+              <div class="card">Profit: <span id="dProfit">0</span></div>
+              <div class="card">Mortality: <span id="dMortality">0</span></div>
+              
+              <canvas id="eggChart"></canvas>
+              <canvas id="profitChart"></canvas>
+              </div>
+          </div>
+              <!-- PRODUCTION -->
+              <div id="layers-production" class="subpage hidden">
+              <h3>Production</h3>
+    
+              <div class="card">
+              <input type="date" id="pDate">
+              <input type="number" id="birds" placeholder="Birds">
+              <input type="number" id="eggs" placeholder="Eggs">
+              <input type="number" id="cracked" placeholder="Cracked">
+              <input type="number" id="layersMortality" placeholder="Mortality">
+              <input type="number" id="layersFeed" placeholder="Feed kg">
+              <input type="number" id="layersFeedCost" placeholder="Total Cost">
+              <input type="number" id="price" placeholder="Price Per Egg">
+              
+              <button onclick="addProduction()">Add Record</button>
+              <button onclick="resetTable()">Reset Table</button>
+            </div>
+              <div id="alertsBox"></div>
+              
+              <h4>Filter Records</h4>
+              <input type="date" id="startDate">
+              <input type="date" id="endDate">
+              <button onclick="filterData()">Apply Filter</button>
+              <button onclick="resetFilter()">Reset</button>
+              
+              <table>
+              <thead>
+              <tr>
+              <th>Date</th>
+              <th>Eggs</th>
+              <th>Good</th>
+              <th>Revenue</th>
+              <th>Profit</th>
+              </tr>
+              </thead>
+              
+              <tbody id="prodTable"></tbody>
+              
+              <tfoot>
+              <tr style="background:#eee; font-weight:bold;">
+              <td>TOTAL</td>
+              <td id="tEggs">0</td>
+              <td id="tGood">0</td>
+              <td id="tRevenue">0</td>
+              <td id="tProfit">0</td>
+              </tr>
+              </tfoot>
+              </table>
+              
+              <div class="card">
+              <h4>Summary</h4>
+              <p>Total Eggs: <span id="sumEggs">0</span></p>
+              <p>Total Revenue: <span id="sumRevenue">0</span></p>
+              <p>Total Profit: <span id="sumProfit">0</span></p>
+              <p>Avg Eggs/Day: <span id="avgEggs">0</span></p>
+              </div>
+              </div>
+              
+              <!-- ANALYTICS -->
+              <div id="layers-analytics" class="subpage hidden">
+              <h3>Advanced Analytics</h3>
+              <div class="cards">
+              <div class="card">Egg %: <span id="eggPercent">0</span>%</div>
+              <div class="card">Feed/Bird: <span id="feedPerBird">0</span></div>
+              <div class="card">Cost/Egg: <span id="costPerEgg">0</span></div>
+              <div class="card">Profit/Bird: <span id="profitPerBird">0</span></div>
+              <div class="card">Mortality %: <span id="mortRate">0</span>%</div>
+              <div class="card">Break-even Eggs: <span id="breakEven">0</span></div>
+            </div>
+              <canvas id="revenueChart"></canvas>
+            </div>
+          
+          <div id="layers-eggs" class="subpage hidden">Egg Records</div>
+          <div id="layers-sales" class="subpage hidden">Sales</div>
+          <div id="layers-expenses" class="subpage hidden">Expenses</div>
+    
+  </section>
+    
+        <!-- ================= FEEDMILL MODULE ================= -->
+  <section id="feedmill" class="module hidden">
+    
+            <div class="subnav">
+              <button onclick="showSub('feedmill','dashboard')">Dashboard</button>
+              <button onclick="showSub('feedmill','formulation')">Formulation</button>
+              <button onclick="showSub('feedmill','inventory')">Inventory</button>
+              <button onclick="showSub('feedmill','sales')">Sales</button>
+              <button onclick="showSub('feedmill','expenses')">Expenses</button>
+            </div>
+          
+            <!-- DASHBOARD -->
+            <div id="feedmill-dashboard" class="subpage">
+              <h2>Feedmill Dashboard</h2>
+    
+              <button onclick="printDashboard()">Print Dashboard</button>
+          
+              <div class="cards">
+                <div class="card">
+                  <h3>Total Production Cost</h3>
+                  <p id="feedmillCost">0</p>
+                </div>
+          
+                <div class="card">
+                  <h3>Total Sales</h3>
+                  <p id="feedSales">0</p>
+                </div>
+          
+                <div class="card">
+                  <h3>Profit</h3>
+                  <p id="feedProfit">0</p>
+                </div>
+          
+                <div class="card">
+                  <h3>Stock Value</h3>
+                  <p id="stockValue">0</p>
+                </div>
+              </div>
+            </div>
+          
+            <!-- FORMULATION -->
+            <div id="feedmill-formulation" class="subpage hidden">
+              <h2>Feed Formulation</h2>
+    
+              <button onclick="printFormulas()">Print Formulas</button>
+          
+              <div class="card">
+                <input id="formulaDate" type="date" placeholder="Date">
+                  <input id="formulaName" placeholder="Formula Name">
+                  <input id="sellingPrice" type="number" placeholder="selling price">
+    
+                  <input id="ingredient" placeholder="Ingredient">
+                  <input id="qty" type="number" placeholder="Quantity (kg)">
+                
+                  <input id="protein" type="number" placeholder="Protein %">
+                  <input id="energy" type="number" placeholder="Energy (kcal)">
+                  <input id="fiber" type="number" placeholder="Fiber %">
+    
+                  <button onclick="addIngredient()">Add</button>
+                  <button onclick="resetAllFeedmill()">Reset Entire Feedmill</button>
+                  <button onclick="saveFormula()">Save Formula</button>
+    
+                  <h3>Current Formula</h3>
+    
+                  <ul id="currentFormulaList"></ul>
+                </div>
+      
+                <h3>Profit per Bag: <span id="profitPerBag">0</span></h3>
+                <p id="validationMsg"></p>
+    
+                <h3>Cost per Bag (50kg): <span id="costPerBag">0</span></h3>
+                <h3>Protein: <span id="totalProtein">0</span>%</h3>
+                <h3>Energy: <span id="totalEnergy">0</span></h3>
+                <h3>Fiber: <span id="totalFiber">0</span>%</h3>
+          
+              <ul id="formulaList"></ul>
+              <h3>Total: <span id="formulaCost">0</span></h3>
+    
+            </div>
+          
+            <!-- INVENTORY -->
+            <div id="feedmill-inventory" class="subpage hidden">
+              <h2>Inventory</h2>
+    
+              <button onclick="printInventory()">Print Inventory</button>
+          
+              <div class="card">
+                <input id="invDate" type="date" placeholder="Date">
+                <input id="invName" type="name" placeholder="Item">
+                <input id="invQty" type="number" placeholder="Quantity">
+                <input id="invPrice" type="number" placeholder="Unit Price">
+                <button onclick="addInventory()">Add</button>
+                <button onclick="resetInventory()">Reset Inventory</button>
+              </div>
+          
+              <ul id="inventoryList"></ul>
+            </div>
+          
+            <!-- SALES -->
+            <div id="feedmill-sales" class="subpage hidden">
+              <h2>Feed Sales</h2>
+          
+              <div class="card">
+                <input id="saleItem" placeholder="Feed Type">
+                <input id="saleQty" type="number" placeholder="Bags">
+                <input id="salePrice" type="number" placeholder="Price per Bag">
+                <button onclick="addFeedSale()">Add</button>
+                <button onclick="resetSales()">Reset Sales</button>
+              </div>
+          
+              <ul id="feedSalesList"></ul>
+            </div>
+          
+            <!-- EXPENSES -->
+            <div id="feedmill-expenses" class="subpage hidden">
+              <h2>Expenses</h2>
+          
+              <div class="card">
+                <input id="expDesc" placeholder="Expense">
+                <input id="expAmount" type="number" placeholder="Amount">
+                <button onclick="addFeedExpense()">Add</button>
+                <button onclick="resetExpenses()">Reset Expenses</button>
+              </div>
+          
+              <ul id="feedExpenseList"></ul>
+            </div>
+    
+          
+  </section>
+    
+        <!-- ================= MASTER DASHBOARD ================= -->
+      <!-- ================= MASTER DASHBOARD ================= -->
+<!-- ========================= -->
+<!-- MASTER DASHBOARD SECTION -->
+<!-- ========================= -->
+
+<section id="masterDashboard" class="module">
+
+  <!-- HEADER -->
+  <div class="dashboard-header">
+      <h1>📊 Master Farm Dashboard</h1>
+      <p>Integrated Poultry Business Monitoring System</p>
+  </div>
+
+  <!-- TOP SUMMARY CARDS -->
+  <div class="dashboard-cards">
+
+      <div class="card">
+          <h3>Total Birds</h3>
+          <h2 id="mTotalBirds">0</h2>
+      </div>
+
+      <div class="card">
+          <h3>Total Eggs</h3>
+          <h2 id="mTotalEggs">0</h2>
+      </div>
+
+      <div class="card">
+          <h3>Total Feed Used (kg)</h3>
+          <h2 id="mTotalFeed">0</h2>
+      </div>
+
+      <div class="card">
+          <h3>Total Mortality</h3>
+          <h2 id="mTotalMortality">0</h2>
+      </div>
+
+      <div class="card">
+          <h3>Total Revenue</h3>
+          <h2 id="mRevenue">0</h2>
+      </div>
+
+      <div class="card">
+          <h3>Total Expenses</h3>
+          <h2 id="mExpenses">0</h2>
+      </div>
+
+      <div class="card profit-card">
+          <h3>Net Profit</h3>
+          <h2 id="mProfit">0</h2>
+      </div>
+
+  </div>
+
+  <!-- BUSINESS HEALTH -->
+  <div class="business-health">
+
+      <div class="health-box">
+          <h3>📈 Egg Production Rate</h3>
+          <h2 id="mEggRate">0%</h2>
+      </div>
+
+      <div class="health-box">
+          <h3>🐔 Feed Conversion Ratio (FCR)</h3>
+          <h2 id="mFCR">0</h2>
+      </div>
+
+      <div class="health-box">
+          <h3>💀 Mortality Rate</h3>
+          <h2 id="mMortRate">0%</h2>
+      </div>
+
+      <div class="health-box">
+          <h3>💰 Cost Per Bird</h3>
+          <h2 id="mCostBird">0</h2>
+      </div>
+
+  </div>
+
+  <!-- ALERT SECTION -->
+  <div class="alerts-section">
+
+      <h2>🚨 Farm Alerts & AI Insight</h2>
+
+      <div id="masterAlerts" class="alert-box">
+          System monitoring farm performance...
+      </div>
+
+  </div>
+
+  <!-- CHART SECTION -->
+  <div class="chart-grid">
+
+      <div class="chart-card">
+          <h3>Egg Production Trend</h3>
+          <canvas id="eggTrendChart"></canvas>
+      </div>
+
+      <div class="chart-card">
+          <h3>Revenue vs Expenses</h3>
+          <canvas id="financeTrendChart"></canvas>
+      </div>
+
+      <div class="chart-card">
+          <h3>Mortality Trend</h3>
+          <canvas id="mortalityTrendChart"></canvas>
+      </div>
+
+      <div class="chart-card">
+          <h3>Feed Consumption Trend</h3>
+          <canvas id="feedTrendChart"></canvas>
+      </div>
+
+  </div>
+
+  <!-- RECENT ACTIVITIES -->
+  <div class="recent-activities">
+
+      <h2>📋 Recent Activities</h2>
+
+      <table class="activity-table">
+
+          <thead>
+              <tr>
+                  <th>Date</th>
+                  <th>Category</th>
+                  <th>Description</th>
+                  <th>Amount</th>
+              </tr>
+          </thead>
+
+          <tbody id="activityTableBody">
+              <!-- Dynamic Data -->
+          </tbody>
+
+      </table>
+
+  </div>
+
+  <!-- ACTION BUTTONS -->
+  <div class="dashboard-actions">
+
+      <button onclick="refreshMasterDashboard()">
+          🔄 Refresh Dashboard
+      </button>
+
+      <button onclick="exportMasterReport()">
+          📥 Export Report
+      </button>
+
+      <button onclick="resetMasterDashboard()">
+          🗑️ Reset Dashboard
+      </button>
+
+  </div>
+
+</section>
+    
+</div>
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+      showModule("masterDashboard");
+  });
+  </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="engine.js"></script>
+    <script src="master.js"></script>
+    <script src="broiler.js"></script>
+    <script src="layers.js"></script>
+    <script src="feed.js"></script> 
+</body>
+</html>
