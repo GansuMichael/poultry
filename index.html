@@ -19,7 +19,7 @@
     
   <!-- SIDEBAR -->
   <aside class="sidebar">
-        <h2>Gansu Poultry Intelligence System</h2>
+        <h2>Gansu System</h2>
     
         <button type="button" onclick="showModule('broiler')">Broiler</button>
         <button type="button" onclick="showModule('layers')">Layers</button>
@@ -29,11 +29,6 @@
     
 <div class="main">
     
-    <div class="dashboard-header">
-        <h1>📊 Master Farm Dashboard</h1>
-        <p>Integrated Poultry Business Monitoring System</p>
-    </div>
-
         <!-- ================= BROILER MODULE ================= -->
   <section id="broiler" class="module hidden">
     
@@ -220,7 +215,7 @@
             
                     <div class="card summary">
                     <div>Total Sales: <span id="sumSales"></span></div>
-                    <div>Total Expenses: <span id="sumExpenses"></span></div>
+                    <div>Total Expenses: <span id="bSumExpenses"></span></div>
                     <div>Profit/Loss: <span id="profit"></span></div>
                     <div>Cost per Bird: <span id="costPerBird"></span></div>
                     </div>
@@ -251,12 +246,13 @@
           <div id="layers-dashboard" class="subpage">
           <h2>Layers Dashboard</h2>
     
-              
               <div class="cards">
               <div class="card">Eggs: <span id="dEggs">0</span></div>
               <div class="card">Revenue: <span id="dRevenue">0</span></div>
               <div class="card">Profit: <span id="dProfit">0</span></div>
               <div class="card">Mortality: <span id="dMortality">0</span></div>
+              <div class="card">Expenses: <span id="dExpenses">0</span></div>
+              <div class="card">Average Eggs: <span id="dAvgEggs">0</span></div>
               
               <canvas id="eggChart"></canvas>
               <canvas id="profitChart"></canvas>
@@ -295,6 +291,7 @@
               <th>Good</th>
               <th>Revenue</th>
               <th>Profit</th>
+              <th>Closing</th>
               </tr>
               </thead>
               
@@ -307,6 +304,7 @@
               <td id="tGood">0</td>
               <td id="tRevenue">0</td>
               <td id="tProfit">0</td>
+              <td id="lFinalStock">0</td>
               </tr>
               </tfoot>
               </table>
@@ -316,7 +314,9 @@
               <p>Total Eggs: <span id="sumEggs">0</span></p>
               <p>Total Revenue: <span id="sumRevenue">0</span></p>
               <p>Total Profit: <span id="sumProfit">0</span></p>
+              <p>Total Cost: <span id="sumExpenses">0</span></p>
               <p>Avg Eggs/Day: <span id="avgEggs">0</span></p>
+              <p>Total live Birds: <span id="liveBirds">0</span></p>
               </div>
               </div>
               
@@ -333,10 +333,10 @@
             </div>
               <canvas id="revenueChart"></canvas>
             </div>
-          
-          <div id="layers-eggs" class="subpage hidden">Egg Records</div>
-          <div id="layers-sales" class="subpage hidden">Sales</div>
-          <div id="layers-expenses" class="subpage hidden">Expenses</div>
+
+            <div id="layers-eggs" class="subpage hidden">Egg Records</div>
+            <div id="layers-sales" class="subpage hidden">Sales</div>
+            <div id="layers-expenses" class="subpage hidden">Expenses</div>
     
   </section>
     
@@ -416,7 +416,7 @@
                 <h3>Fiber: <span id="totalFiber">0</span>%</h3>
           
               <ul id="formulaList"></ul>
-              <h3>Total Cost: <span id="formulaCost">0</span></h3>
+              <h3>Total: <span id="formulaCost">0</span></h3>
     
             </div>
           
@@ -479,7 +479,10 @@
 <section id="masterDashboard" class="module">
 
   <!-- HEADER -->
-
+  <div class="dashboard-header">
+      <h1>📊 Master Farm Dashboard</h1>
+      <p>Integrated Poultry Business Monitoring System</p>
+  </div>
 
   <!-- TOP SUMMARY CARDS -->
   <div class="dashboard-cards">

@@ -263,7 +263,7 @@ function renderExpenses() {
     getEl("totalExpenses").innerText =
     formatNumber(total);
 
-    getEl("sumExpenses").innerText =
+    getEl("bSumExpenses").innerText =
     formatNumber(total);
 
     calculateProfit();

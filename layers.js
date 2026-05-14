@@ -5,12 +5,12 @@
 let layersData =
 JSON.parse(localStorage.getItem("layersData")) || [];
 
-let eggChart;
-let profitChart;
+let eggChart = null;
+let profitChart = null;
 
 
 // ===============================
-// SAVE
+// HELPERS
 // ===============================
 
 function saveLayers() {
@@ -23,34 +23,59 @@ function saveLayers() {
 }
 
 
+function getNumber(id) {
+
+    return Number(getEl(id).value) || 0;
+
+}
+
+
 // ===============================
 // ADD PRODUCTION
 // ===============================
 
 function addProduction() {
 
+    const date = getEl("pDate").value;
+
+    if (!date) {
+        alert("Please select a date");
+        return;
+    }
+
     const data = {
 
-        date: getEl("pDate").value,
-        birds: Number(getEl("birds").value),
-        eggs: Number(getEl("eggs").value),
-        cracked: Number(getEl("cracked").value),
-        mortality: Number(getEl("layersMortality").value),
-        feed: Number(getEl("layersFeed").value),
-        feedCost: Number(getEl("layersFeedCost").value),
-        price: Number(getEl("price").value)
+        date,
+
+        birds: getNumber("birds"),
+
+        eggs: getNumber("eggs"),
+
+        cracked: getNumber("cracked"),
+
+        mortality: getNumber("layersMortality"),
+
+        feed: getNumber("layersFeed"),
+
+        feedCost: getNumber("layersFeedCost"),
+
+        price: getNumber("price")
 
     };
 
-    data.good =
-    data.eggs - data.cracked;
+    // Calculations
+    data.good = data.eggs - data.cracked;
 
-    data.revenue =
-    data.good * data.price;
+    data.revenue = data.good * data.price;
 
-    data.profit =
-    data.revenue - data.feedCost;
+    data.profit = data.revenue - data.feedCost;
 
+    data.expenses = data.feedCost;
+
+    data.closing =
+    data.birds - data.mortality;
+
+    // Save
     layersData.push(data);
 
     saveLayers();
@@ -63,36 +88,51 @@ function addProduction() {
 // RENDER
 // ===============================
 
-function renderLayers() {
+function renderLayers(data = layersData) {
 
-    const table =
-    getEl("prodTable");
-
-    table.innerHTML = "";
+    const table = getEl("prodTable");
 
     let eggs = 0;
     let revenue = 0;
     let profit = 0;
     let mortality = 0;
+    let expenses = 0;
+    let good = 0;
+    let clossing = 0;
 
-    layersData.forEach(data => {
+    let html = "";
 
-        eggs += data.eggs;
-        revenue += data.revenue;
-        profit += data.profit;
-        mortality += data.mortality;
+    data.forEach(item => {
 
-        table.innerHTML += `
+        eggs += item.eggs;
+
+        revenue += item.revenue;
+
+        profit += item.profit;
+
+        mortality += item.mortality;
+
+        expenses += item.feedCost;
+
+        good += item.good;
+
+        closing = item.closing;
+
+        html += `
         <tr>
-            <td>${data.date}</td>
-            <td>${data.eggs}</td>
-            <td>${data.good}</td>
-            <td>${formatNumber(data.revenue)}</td>
-            <td>${formatNumber(data.profit)}</td>
+            <td>${item.date}</td>
+            <td>${formatNumber(item.eggs)}</td>
+            <td>${formatNumber(item.good)}</td>
+            <td>${formatNumber(item.revenue)}</td>
+            <td>${formatNumber(item.profit)}</td>
+            <td>${data.closing}</td>
         </tr>
         `;
     });
 
+    table.innerHTML = html;
+
+    // Dashboard
     getEl("dEggs").innerText =
     formatNumber(eggs);
 
@@ -105,6 +145,31 @@ function renderLayers() {
     getEl("dMortality").innerText =
     formatNumber(mortality);
 
+    getEl("dExpenses").innerText =
+    formatNumber(expenses);
+
+    getEl("tProfit").innerText =
+    formatNumber(profit);
+
+    getEl("tRevenue").innerText =
+    formatNumber(revenue);
+
+    getEl("tEggs").innerText =
+    formatNumber(eggs);
+
+    getEl("lFinalStock").innerText =
+    data.length
+    ? formatNumber(
+        data[data.length - 1].closing
+      )
+    : 0;
+
+    getEl("dAvgEggs").innerText =
+    data.length
+        ? formatNumber(eggs / data.length)
+        : "0.00";
+
+    // Summary
     getEl("sumEggs").innerText =
     formatNumber(eggs);
 
@@ -114,7 +179,105 @@ function renderLayers() {
     getEl("sumProfit").innerText =
     formatNumber(profit);
 
+    getEl("sumExpenses").innerText =
+    formatNumber(expenses);
+
+    // Average Eggs
+    getEl("avgEggs").innerText =
+    data.length
+        ? formatNumber(eggs / data.length)
+        : "0.00";
+
+    getEl("liveBirds").innerText =
+    data.length
+    ? formatNumber(
+        data[data.length - 1].closing
+        )
+    : 0;
+
     drawLayersCharts();
+
+    updateAnalytics();
+}
+
+
+// ===============================
+// ANALYTICS
+// ===============================
+
+function updateAnalytics() {
+
+    let totalBirds = 0;
+
+    let totalEggs = 0;
+
+    let totalFeed = 0;
+
+    let totalCost = 0;
+
+    let totalProfit = 0;
+
+    let totalMort = 0;
+
+    let price = 0;
+
+    layersData.forEach(item => {
+
+        totalBirds += item.birds;
+
+        totalEggs += item.eggs;
+
+        totalFeed += item.feed;
+
+        totalCost += item.feedCost;
+
+        totalProfit += item.profit;
+
+        totalMort += item.mortality;
+
+        price = item.price;
+
+    });
+
+    getEl("eggPercent").innerText =
+    formatNumber(
+        totalBirds
+            ? (totalEggs / totalBirds) * 100
+            : 0
+    );
+
+    getEl("feedPerBird").innerText =
+    formatNumber(
+        totalBirds
+            ? totalFeed / totalBirds
+            : 0
+    );
+
+    getEl("costPerEgg").innerText =
+    formatNumber(
+        totalEggs
+            ? totalCost / totalEggs
+            : 0
+    );
+
+    getEl("profitPerBird").innerText =
+    formatNumber(
+        totalBirds
+            ? totalProfit / totalBirds
+            : 0
+    );
+
+    getEl("mortRate").innerText =
+    formatNumber(
+        totalBirds
+            ? (totalMort / totalBirds) * 100
+            : 0
+    );
+
+    getEl("breakEven").innerText =
+    totalProfit > 0
+        ? formatNumber(totalCost / price)
+        : "0";
 }
 
 
@@ -135,40 +298,56 @@ function drawLayersCharts() {
     const labels =
     layersData.map(item => item.date);
 
+    // Destroy old charts
     if (eggChart) eggChart.destroy();
+
     if (profitChart) profitChart.destroy();
 
-    eggChart = new Chart(
-        eggCanvas,
-        {
-            type: "line",
-            data: {
-                labels,
-                datasets: [{
-                    label: "Egg Production",
-                    data: layersData.map(
-                        item => item.eggs
-                    )
-                }]
-            }
-        }
-    );
+    // Egg Chart
+    eggChart = new Chart(eggCanvas, {
 
-    profitChart = new Chart(
-        profitCanvas,
-        {
-            type: "bar",
-            data: {
-                labels,
-                datasets: [{
-                    label: "Profit",
-                    data: layersData.map(
-                        item => item.profit
-                    )
-                }]
-            }
+        type: "line",
+
+        data: {
+
+            labels,
+
+            datasets: [{
+
+                label: "Egg Production",
+
+                data: layersData.map(
+                    item => item.eggs
+                ),
+
+                tension: 0.3
+
+            }]
         }
-    );
+
+    });
+
+    // Profit Chart
+    profitChart = new Chart(profitCanvas, {
+
+        type: "bar",
+
+        data: {
+
+            labels,
+
+            datasets: [{
+
+                label: "Profit",
+
+                data: layersData.map(
+                    item => item.profit
+                )
+
+            }]
+        }
+
+    });
 }
 
 
@@ -178,7 +357,10 @@ function drawLayersCharts() {
 
 function resetTable() {
 
-    if (!confirm("Reset layers data?")) return;
+    const confirmReset =
+    confirm("Reset all layers data?");
+
+    if (!confirmReset) return;
 
     layersData = [];
 
@@ -210,35 +392,18 @@ function filterData() {
 
     });
 
-    renderFiltered(filtered);
+    renderLayers(filtered);
 }
 
 
-function renderFiltered(data) {
-
-    const table =
-    getEl("prodTable");
-
-    table.innerHTML = "";
-
-    data.forEach(item => {
-
-        table.innerHTML += `
-        <tr>
-            <td>${item.date}</td>
-            <td>${item.eggs}</td>
-            <td>${item.good}</td>
-            <td>${item.revenue}</td>
-            <td>${item.profit}</td>
-        </tr>
-        `;
-    });
-}
-
+// ===============================
+// RESET FILTER
+// ===============================
 
 function resetFilter() {
 
     getEl("startDate").value = "";
+
     getEl("endDate").value = "";
 
     renderLayers();
